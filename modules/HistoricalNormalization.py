@@ -13,6 +13,7 @@ class HistoricalNormalization(nn.Module):
         self.clip_trivial_thres = clip_trivial_thres
 
     def forward(self, x):
+        assert len(x.size()) == 4, '***x.size != 4***'
         ret_val = historical_normalization(x, self.running_mean, self.running_stdv, self.eps)
         x_mean = mean_on_023dim(x)
         x_stdv = tt.sqrt(mean_on_023dim((x - x_mean) * (x - x_mean)))
@@ -27,9 +28,7 @@ if __name__ == '__main__':
     HN = HistoricalNormalization(3)
     x = Variable(tt.zeros(1000, 3, 8, 8).normal_(2.0, 3.0), requires_grad=True)
 
-
-    print(x.mean(), x.std())
-
+    print('x: {:.4f}, {:.4f}'.format(x.mean().data[0], x.std().data[0]))
     for ii in range(30):
         y = HN(x)
-        print('{:.4f}, {:.4f}'.format(y.mean().data[0], y.std().data[0]))
+        print('y: {}, {:.4f}, {:.4f}'.format(ii, y.mean().data[0], y.std().data[0]))
